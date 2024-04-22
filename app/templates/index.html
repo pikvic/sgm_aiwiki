@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <title>SGM Chat</title>
+    <style>
+        .fixed {
+            position: fixed;
+            height: 100%;
+            width: 100%;
+        }
+        .h80 {
+            height: 80%;
+            padding-top: 2%;
+        }
+        .h20 {
+            height: 20%;
+        }
+    </style>
+</head>
+<body class="fixed">
+    <div id="chat" class="container h80">
+        {% for message in messages %}
+            <div class="row">
+                <div class="col">
+                {% if message.role == "bot" %}
+                    <p><strong>Бот:</strong> {{ message.content }}</p>
+                {% endif %}
+                {% if message.role == "user" %}
+                    <p><strong>Вы:</strong> {{ message.content }}</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="container h20">
+        <div class="col">
+            <div class="row">
+                <label for="message" class="form-label">Сообщение</label>
+                <textarea class="form-control" id="message" rows="3"></textarea>
+            </div>
+        </div>
+        <div class="col">
+            <div class="row">
+                <button id="button" type="button" class="btn btn-primary" onclick="sendMessage()">Отправить</button>
+            </div>
+        </div>
+    </div>
+    <script>
+
+        function add_message(message, role) {
+            let chat = document.getElementById("chat");
+            let row = document.createElement("div");
+            row.classList.add("row");
+            let col = document.createElement("div");
+            col.classList.add("col");
+            let p = document.createElement("p");
+            if (role == "bot") {
+                p.innerHTML = `<strong>Бот:</strong> ${message}`;
+            }
+            else { 
+                p.innerHTML = `<strong>Вы:</strong> ${message}`;
+            }
+            col.appendChild(p);
+            row.appendChild(col);
+            chat.appendChild(row);
+        }
+
+        function sendMessage() {
+            let message = document.getElementById("message");
+            let url = window.location.href;
+            let button = document.getElementById("button");
+            add_message(message.value, "user");
+            button.disabled = true;
+            fetch(`${url}chat`, {
+                method: 'POST', // Здесь так же могут быть GET, PUT, DELETE
+                body: JSON.stringify({
+                    role: "user",
+                    content: message.value
+                }), // Тело запроса в JSON-формате
+                headers: {
+                  // Добавляем необходимые заголовки
+                  'Content-type': 'application/json; charset=UTF-8',
+                },
+                credentials: 'include'
+              })
+                .then((response) => response.json())
+                .then((data) => {
+                    button.disabled = false;
+                    message.value = "";
+                    add_message(data["content"], "bot");
+                })
+        }
+          
+    </script>
+</body>
+</html>
