@@ -1,0 +1,91 @@
+{% extends 'index.html' %}
+
+{% block chat %}
+    <div id="chat" class="container h80">
+        {% for message in messages %}
+        <div class="row">
+            <div class="col">
+                {% if message.role == "bot" %}
+                    <p><strong>Бот:</strong> {{ message.content }}</p>
+                {% endif %}
+                {% if message.role == "user" %}
+                    <p><strong>Вы:</strong> {{ message.content }}</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="container h20">
+        <div class="col">
+            <div class="row">
+                <label for="message" class="form-label">Сообщение</label>
+                <textarea class="form-control" id="message" rows="3"></textarea>
+            </div>
+        </div>
+        <div class="col">
+            <div class="row">
+                <button id="button" type="button" class="btn btn-primary" onclick="sendMessage()">Отправить</button>
+            </div>
+        </div>
+    </div>
+
+
+   
+{% endblock chat %}
+
+{% block js %}
+    <script>
+
+        function newChat() {
+            window.location = `${window.location.origin}/chats/new`;
+        }
+        function openChat(url) {
+            window.location = `${window.location.origin}/${url}`;
+        }
+
+        function add_message(message, role) {
+            let chat = document.getElementById("chat");
+            let row = document.createElement("div");
+            row.classList.add("row");
+            let col = document.createElement("div");
+            col.classList.add("col");
+            let p = document.createElement("p");
+            if (role == "bot") {
+                p.innerHTML = `<strong>Бот:</strong> ${message}`;
+            }
+            else { 
+                p.innerHTML = `<strong>Вы:</strong> ${message}`;
+            }
+            col.appendChild(p);
+            row.appendChild(col);
+            chat.appendChild(row);
+        }
+
+        function sendMessage() {
+            let message = document.getElementById("message");
+            let url = window.location.href;
+            let button = document.getElementById("button");
+            add_message(message.value, "user");
+            button.disabled = true;
+            fetch(`${url}chat`, {
+                method: 'POST', // Здесь так же могут быть GET, PUT, DELETE
+                body: JSON.stringify({
+                    role: "user",
+                    content: message.value
+                }), // Тело запроса в JSON-формате
+                headers: {
+                  // Добавляем необходимые заголовки
+                  'Content-type': 'application/json; charset=UTF-8',
+                },
+                credentials: 'include'
+              })
+                .then((response) => response.json())
+                .then((data) => {
+                    button.disabled = false;
+                    message.value = "";
+                    add_message(data["content"], "bot");
+                })
+        }
+          
+    </script>
+{% endblock js %}

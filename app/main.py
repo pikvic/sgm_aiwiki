@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from pathlib import Path
@@ -44,18 +44,39 @@ chats = {}
 async def root(request: Request):
 
     user_id = request.cookies.get("user_id", None)
-
-    # chat_id = request.cookies.get("chat_id", None)
-    message = ChatMessage(role="bot", content=hello, created=now())
-    response = templates.TemplateResponse("index.html", {"request": request, "messages": [message]})
     
     if not user_id:
         user_id = str(uuid4())
+        response = templates.TemplateResponse("index.html", {"request": request, "chats": []})
         response.set_cookie(key="user_id", value=user_id)
+    else:
+        user_chats = mongo.get_user_chats(user_id)
+        for chat in user_chats:
+            title = chat['messages'][0]['content'] if len(chat['messages']) < 2 else chat['messages'][1]['content']
+            chat["title"] = f"{title}..."
+            chat["created"] = chat["chat_created"].strftime("%Y-%m-%d %H:%M:%S")
+            chat["url"] = f'chats/{chat["chat_id"]}'
+        response = templates.TemplateResponse("index.html", {"request": request, "chats": user_chats})
     
+    return response
+
+@app.get("/chats/new", response_class=HTMLResponse)
+async def new_chat(request: Request):
+    user_id = request.cookies.get("user_id", None)
+
+    if not user_id:
+        return RedirectResponse("/")    
+
+    user_chats = mongo.get_user_chats(user_id)
+    for chat in user_chats:
+        title = chat['messages'][0]['content'] if len(chat['messages']) < 2 else chat['messages'][1]['content']
+        chat["title"] = f"{title}..."
+        chat["created"] = chat["chat_created"].strftime("%Y-%m-%d %H:%M:%S")
+        chat["url"] = f'chats/{chat["chat_id"]}'
+
+    message = ChatMessage(role="bot", content=hello, created=now())
     chat_id = str(uuid4())
     chat_created = now()
-    response.set_cookie(key="chat_id", value=chat_id)
     chat = {
         "chat_id": chat_id,
         "chat_created": chat_created,
@@ -63,11 +84,30 @@ async def root(request: Request):
         "messages": [message.model_dump()],
         "model_messages": []
     }
-
     mongo.create_chat(chat)
-    # chat = None
-    # chats[chat_id] = {"chat": chat, "messages": [message]}
+
+    response = templates.TemplateResponse("chat.html", {"request": request, "messages": [message], "chats": user_chats})
+    response.set_cookie(key="chat_id", value=chat_id)
     return response
+
+@app.get("/chats/{chat_id}", response_class=HTMLResponse)
+async def new_chat(chat_id: str, request: Request):
+    user_id = request.cookies.get("user_id", None)
+    if not user_id:
+        return RedirectResponse("/")    
+    user_chats = mongo.get_user_chats(user_id)
+    for chat in user_chats:
+        title = chat['messages'][0]['content'] if len(chat['messages']) < 2 else chat['messages'][1]['content']
+        chat["title"] = f"{title}..."
+        chat["created"] = chat["chat_created"].strftime("%Y-%m-%d %H:%M:%S")
+        chat["url"] = f'chats/{chat["chat_id"]}'
+    
+    chat = mongo.get_chat(chat_id)
+    messages = chat["messages"]
+    response = templates.TemplateResponse("chat.html", {"request": request, "messages": messages, "chats": user_chats})
+    response.set_cookie(key="chat_id", value=chat_id)
+    return response
+
 
 @app.post("/chat", response_model=ChatMessage)
 async def chat(request: Request, message: ChatMessageIn):
@@ -107,36 +147,5 @@ async def chat(request: Request, message: ChatMessageIn):
     mongo.add_message(chat_id, response_message.model_dump())
 
     return response_message
-    # chat_id = request.cookies.get("chat_id", None)
-    # print(chat_id)
-    # print(message)
-    # if not chats[chat_id]["chat"]:
-    #     strings = [f.stem for f in files]
-    #     res = search(message.content, strings=strings)
-    #     print(res)
-    #     if not res:
-    #         content = "Такого месторождения нет в базе."
-    #         msg = ChatMessage(role="bot", content=content)
-    #         return msg    
-    #     if len(res) > 1:
-    #         text = ", ".join(res)
-    #         content = f"Пожалуйста, укажите одно из подходящих месторождений: {text}"
-    #         msg = ChatMessage(role="bot", content=content)
-    #         return msg
-    #     if len(res) == 1:
-    #         title, text = get_data(res[0])
-    #         the_chat = get_init_messages(title, text)
-    #         chats[chat_id]["chat"] = the_chat
-    #         content = f"Месторождение выбрано. Задавайте ваши вопросы."
-    #         msg = ChatMessage(role="bot", content=content)
-    #         return msg
 
-    # chat_messages = chats[chat_id]["chat"]
-    # chat_messages.append(HumanMessage(content=message.content))
-    # print(chat_messages)
-    # res = model(chat_messages)
-    # chat_messages.append(res)
-    # chats[chat_id]["messages"].append(res.content)
-    # msg = ChatMessage(role="bot", content=res.content)
-    # return msg
 

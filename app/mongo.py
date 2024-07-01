@@ -25,6 +25,11 @@ class MongoAPI:
         result = chat_cursor.find_one({"chat_id": chat_id})
         return result
     
+    def get_user_chats(self, user_id):
+        chat_cursor = self.db["chats"]
+        result = chat_cursor.find({"user_id": user_id})
+        return list(result)
+
     def get_scenes(self):
         result = self.db.scene.find()
         return list(result)
