@@ -12,6 +12,8 @@ services:
       - MONGO_INITDB_DATABASE=sgm_aiwiki
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=nwe472psc
+    volumes:
+      - ./mongo_data:/data/db
     restart: always
 
   chat:

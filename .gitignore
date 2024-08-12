@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+mongo_data/
 app/chroma
 
 # C extensions
