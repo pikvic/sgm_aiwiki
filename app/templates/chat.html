@@ -67,7 +67,7 @@
             let button = document.getElementById("button");
             add_message(message.value, "user");
             button.disabled = true;
-            fetch(`${url}chat`, {
+            fetch(`${window.location.origin}/chats`, {
                 method: 'POST', // Здесь так же могут быть GET, PUT, DELETE
                 body: JSON.stringify({
                     role: "user",

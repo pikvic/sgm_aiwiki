@@ -1,9 +1,9 @@
 FROM python:3.11
-
+RUN mkdir code
 WORKDIR /code
-COPY . /code/
-RUN pip install --no-cache-dir --upgrade poetry
-RUN poetry install
-
-
+COPY /pyproject.toml /code
+RUN pip3 install poetry
+RUN poetry config virtualenvs.create false
+RUN poetry install 
+COPY . .
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

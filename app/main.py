@@ -98,7 +98,7 @@ async def new_chat(chat_id: str, request: Request):
     user_chats = mongo.get_user_chats(user_id)
     for chat in user_chats:
         title = chat['messages'][0]['content'] if len(chat['messages']) < 2 else chat['messages'][1]['content']
-        chat["title"] = f"{title}..."
+        chat["title"] = f"{title[:50]}..."
         chat["created"] = chat["chat_created"].strftime("%Y-%m-%d %H:%M:%S")
         chat["url"] = f'chats/{chat["chat_id"]}'
     
@@ -109,7 +109,7 @@ async def new_chat(chat_id: str, request: Request):
     return response
 
 
-@app.post("/chat", response_model=ChatMessage)
+@app.post("/chats", response_model=ChatMessage)
 async def chat(request: Request, message: ChatMessageIn):
     user_id = request.cookies.get("user_id", None)
     chat_id = request.cookies.get("chat_id", None)

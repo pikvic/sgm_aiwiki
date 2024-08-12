@@ -1,0 +1,29 @@
+version: '3.9'
+
+services:
+
+  db:
+    image: mongo
+    ports:
+      - 27018:27017
+    networks:
+      - backend
+    environment:
+      - MONGO_INITDB_DATABASE=sgm_aiwiki
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=nwe472psc
+    restart: always
+
+  chat:
+    build: ./
+    ports:
+      - 8070:8000
+    networks:
+      - backend
+    depends_on:
+      - db
+    env_file: .env
+    restart: always
+
+networks:
+  backend:
