@@ -20,10 +20,18 @@ files = [f for f in wiki_dir.iterdir()]
 model = GigaChat(credentials=TOKEN, verify_ssl_certs=False)
 mongo = MongoAPI()
 
+def convert_datetime(dt: datetime.datetime):
+    return dt.strftime("%Y-%m-/%d %H:%M:%S")
+
 class ChatMessage(BaseModel):
     role: str
     content: str
     created: datetime.datetime
+    class Config:
+        json_encoders = {
+            # custom output conversion for datetime
+            datetime.datetime: convert_datetime
+        }
 
 class ChatMessageIn(BaseModel):
     role: str

@@ -6,10 +6,10 @@
         <div class="row">
             <div class="col">
                 {% if message.role == "bot" %}
-                    <p><strong>Бот ({{ message.created }}):</strong><br>{{ message.content }}</p>
+                    <p><strong>Бот ({{ message.created.strftime("%Y-%m-%d %H:%M:%S") }}):</strong><br>{{ message.content }}</p>
                 {% endif %}
                 {% if message.role == "user" %}
-                    <p><strong>Вы ({{ message.created }}):</strong><br>{{ message.content }}</p>
+                    <p><strong>Вы ({{ message.created.strftime("%Y-%m-%d %H:%M:%S") }}):</strong><br>{{ message.content }}</p>
                 {% endif %}
             </div>
         </div>
