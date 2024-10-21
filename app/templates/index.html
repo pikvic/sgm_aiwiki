@@ -226,10 +226,45 @@
             background-color: rgba(85, 85, 85, 0.1);
         }
 
+        #footer {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: block;
+            overflow: visible;
+            width: 100%;
+            border-top: 1px solid transparent;
+            border-top-color: #36363a;
+            background-color: #222226;
+            color: #AAA;
+            clear: both;
+        }
 
+        #footer-inside {
+            margin: 0 auto;
+            max-width: 1920px;
+            display: block;
+            float: none;
+            position: relative;
+            overflow: hidden;
+            padding: 1.5rem;
+            box-sizing: border-box;
+        }
+
+        #site-copyright {
+            text-align: center;
+            display: block;
+            clear: left;
+            font-style: italic;
+            font-size: 18px;
+        }
+
+        #site-copyright > a {
+            color: #AAA !important;
+            text-decoration: none;
+        }
         
-
-
 
 
         .fixed {
@@ -239,7 +274,7 @@
         }
         .h100 {
             height: 100%;
-            max-height: 85vh;
+            max-height: 77vh;
         }
         .h80 {
             height: 80%;
@@ -438,6 +473,15 @@
         </div>
     </div>
 </main>
+<div id="footer" class="cryout ng-scope">
+    <div id="footer-inside">
+        <div id="site-copyright">
+            <a href="https://sgm.ru">© 2024 Государственный геологический музей им. В.И. Вернадского
+                РАН</a>
+        </div>
+    </div>
+    <!-- #footer-inside -->
+</div>
     {% block js %}
         <script>
             function newChat() {
